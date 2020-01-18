@@ -1,4 +1,4 @@
-console.log('- app.js user-library1110');
+console.log('- app.js user-library1111');
 
 var createError = require('http-errors');
 var express = require('express');
@@ -24,7 +24,7 @@ var catalogRoutes = require('./routes/catalogRoutes.js');
 // Hide secret data with nconf
 var nconf = require('nconf');
  
-nconf.argv().env().file({ file: './user-library1110/config.json' });
+nconf.argv().env().file({ file: './user-library1111/config.json' });
  
 // console.log('nconf.get: ' + nconf.get("DB_USER"));
 // console.log('nconf.get: ' + nconf.get("DB_PASSWORD"));
@@ -96,7 +96,7 @@ app.use(function(err, req, res, next) {
 
 module.exports = app;
 
-console.log('app.js user-library1110');
+console.log('app.js user-library1111');
 
 
 
