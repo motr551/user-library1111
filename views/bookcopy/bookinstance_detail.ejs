@@ -26,20 +26,22 @@
         </span>
         
         <Br><br>
-        Book available to Loan, click below to loan
-       <!--  <Form action="" method="post">
+        This copy of the book is "available" to Reserve, click below to reserve:
+        <Form action="" method="post">
           <div>
+<!-- 
           <input type="radio" name="status" 
-          value="Loan">Loan<br>
+          value="Loaned">Loaned<br>
            <input type="radio" name="status" 
-          value="return">Return<br> 
-<button type="submit">Submit</button>
+          value="Available">Return<br> 
+           -->
+          <button type="submit" name="status" value="makeBookReserved">Reserve Book</button>
+          <!-- <p style="width: 150px"> -->
+          <!-- <input type="submit" style="width: 150px; background-color: lightblue ;" name="status" value="Reserve Book" > -->
+          <!-- </p> -->
           </div>
         </Form> 
-      -->
-
-          
-        
+     
 
       <% } else if ( bookinstance.status=='Maintenance') { %>
         <span style="color: red"><%= bookinstance.status %>
@@ -47,9 +49,33 @@
       <% } else if ( bookinstance.status=='Loaned') { %>
         <span style="color: rgb(228, 207, 19)"><%= bookinstance.status %>
         </span>
+            <% if (username == 'admin') { %>
+              <strong> By:</strong>   <%=bookinstance.loaned_by %>
+          <% } %>
         <% } else if ( bookinstance.status=='Reserved') { %>
           <span style="color: rgb(228, 207, 19)"><%= bookinstance.status %>
           </span>
+          <% if (username == 'admin') { %>
+             <strong> By:</strong>   <%=bookinstance.reserved_by %>
+          <% } %>
+          <Form action="" method="post">
+            <div>
+  <!-- 
+            <input type="radio" name="status" 
+            value="Loaned">Loaned<br>
+             <input type="radio" name="status" 
+            value="Available">Return<br> 
+             -->
+             <% if (username == 'admin'  || username == bookinstance.reserved_by ) { %>
+            <button type="submit" name="status" value="makeBookAvailable">Delete Book Reservation</button>
+            <% } %>
+            <!-- <p style="width: 150px"> -->
+            <!-- <input type="submit" style="width: 150px; background-color: lightblue ;" name="status" value="Reserve Book" > -->
+            <!-- </p> -->
+            </div>
+          </Form>
+
+
       <% } %>
     
     </p>
@@ -60,14 +86,16 @@
       </p>
     <% } %>
 
-    <hr> 
+    <% if (username == 'admin') { %>
+      <hr> 
       <p><a href='<%= bookinstance.url %>/delete'>
         Delete bookinstance
         </a>
       </p>
       <p> <a href='<%= bookinstance.url %>/update' >
         Update Bookinstance </a> 
-      </p> 
+      </p>
+    <% } %> 
       
   </div>
 </body>

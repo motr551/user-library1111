@@ -80,71 +80,126 @@ exports.bookinstance_detail = function(req, res, next){
 };
 
 
-// exports.bookinstance_detail_post = [
+exports.bookinstance_detail_post = [
 
-//   // Validate fields.
-//   validator.body('status', 'status must be specified').isLength({ min: 1 }).trim(),
+  // Validate fields.
+  validator.body('status', 'status must be specified').isLength({ min: 1 }).trim(),
 
-//   // validator.body('imprint', 'Imprint must be specified').isLength({ min: 1 }).trim(),
+  // validator.body('imprint', 'Imprint must be specified').isLength({ min: 1 }).trim(),
 
-//   // validator.body('due_back', 'Invalid date').optional({ checkFalsy: true }).isISO8601(),
+  // validator.body('due_back', 'Invalid date').optional({ checkFalsy: true }).isISO8601(),
   
-//   // // Sanitize fields.
-//   validator.sanitizeBody('status').escape(),
+  // // Sanitize fields.
+  validator.sanitizeBody('status').escape(),
 
-//   // validator.sanitizeBody('imprint').escape(),
+  // validator.sanitizeBody('imprint').escape(),
 
-//   // validator.sanitizeBody('status').trim().escape(),
+  // validator.sanitizeBody('status').trim().escape(),
 
-//   // validator.sanitizeBody('due_back').toDate(),
+  // validator.sanitizeBody('due_back').toDate(),
   
-//   // Process request after validation and sanitization.
-//   (req, res, next) => {
-//     console.log('-- bookinstanceController.js exports.bookinstance_detail_post [,,,,,,,(req,res,next)]');
+  // Process request after validation and sanitization.
+  (req, res, next) => {
+    console.log('-- bookinstanceController.js exports.bookinstance_detail_post [,,,,,,,(req,res,next)]');
 
-//     // Extract the validation errors from a request.
-//     const errors = validator.validationResult(req);
+    // Extract the validation errors from a request.
+   const errors = validator.validationResult(req);
 
     
-//     // Create a BookInstance object with escaped and trimmed data.
-//     // var bookinstance = new BookInstance(
-//     //   { book: req.body.book,
-//     //     imprint: req.body.imprint,
-//     //     status: req.body.status,
-//     //     // loaned_by: req.body.loaned_by,
-//     //     // reserved_by: req.body.reserved_by,
-//     //     due_back: req.body.due_back
-//     //   });
+    // Create a BookInstance object with escaped and trimmed data.
+    // var bookinstance = new BookInstance(
+    //   { book: req.body.book,
+    //     imprint: req.body.imprint,
+    //     status: req.body.status,
+    //     // loaned_by: req.body.loaned_by,
+    //     // reserved_by: req.body.reserved_by,
+    //     due_back: req.body.due_back
+    //   });
       
-//     //   bookinstance.book = '5da8a1ff1931e111bc2efff3'
-//     //  bookinstance.imprint = 'Johnsons, 2022';
+    //   bookinstance.book = '5da8a1ff1931e111bc2efff3'
+    //  bookinstance.imprint = 'Johnsons, 2022';
 
-//     // if (!errors.isEmpty()) {
-//       // There are errors. Render form again with sanitized values and error messages.
-//       Book.find({},'title').exec(function (err, books)
-//       {
-//         if (err) { return next(err); }
-//         // Successful, so render.
-//         (!req.user)?
-//           res.render('./user/loginRegisterPage.ejs', {title: 'Login or Register '})
-//           :
-//           res.render('./bookcopy/bookinstance_form.ejs', { title: 'CREATE BOOK INSTANCE FORM', books: books, selected_book: bookinstance.book._id , errors: errors.array(), bookinstance: bookinstance, username: req.user.username });
-//       });
-//       return;
-//     // }
-//     // else {
-//     //   // Data from form is valid.
-//     //   bookinstance.save(function (err) {
-//     //   if (err) { return next(err); }
-//     //     // Successful - redirect to new record.
-//     //     res.redirect(bookinstance.url);
-//     //   });
-//     // }
+    // if (!errors.isEmpty()) {
+      // There are errors. Render form again with sanitized values and error messages.
+      // Book.find({},'title').exec(function (err, books)
+      // {
+      //   if (err) { return next(err); }
+      //   // Successful, so render.
+      //   (!req.user)?
+      //     res.render('./user/loginRegisterPage.ejs', {title: 'Login or Register '})
+      //     :
+      //     res.render('./bookcopy/bookinstance_form.ejs', { title: 'CREATE BOOK INSTANCE FORM', books: books, selected_book: bookinstance.book._id , errors: errors.array(), bookinstance: bookinstance, username: req.user.username });
+      // });
+      // return;
 
-//     console.log('bookinstanceController.js exports.bookinstance_detail_post [,,,,,,,(req,res,next)]');
+      BookInstance.findById(req.params.id)
+    .populate('book')
+    .exec( function (err, bookinstance) {
+      if (err) { return next(err); }
+      if (bookinstance==null) { // No results.
+          var err = new Error('Book copy not found');
+          err.status = 404;
+          return next(err);
+      } else {
 
-//   }
-// ];
+
+          if (req.body.status == "makeBookAvailable") {
+            // Create a bookinstance object with escaped/trimmed data and old id.
+            var updatebookinstance = new BookInstance(
+              { status: 'Available',
+                book: bookinstance.book.id,
+                imprint: bookinstance.imprint,
+                due_back: bookinstance.due_back,
+                reserved_by: "",
+                loaned_by: "",
+                _id: req.params.id
+              });
+          } else if (req.body.status == "makeBookReserved"){
+            // Create a bookinstance object with escaped/trimmed data and old id.
+            var updatebookinstance = new BookInstance(
+              { status: 'Reserved',
+                book: bookinstance.book.id,
+                imprint: bookinstance.imprint,
+                due_back: bookinstance.due_back,
+                reserved_by: req.user.username,
+                loaned_by: "",
+                _id: req.params.id
+              });
+          }
+        // Data from form is valid. Update the record.
+        BookInstance.findByIdAndUpdate(req.params.id, updatebookinstance, {}, function (err,thebookinstance) {
+          if (err) { return next(err); }
+            // Successful - redirect to bookinstance detail page.
+            res.redirect(thebookinstance.url);
+          });
+      }
+    })
+
+
+    //   // Successful, so render.
+    //   (!req.user)?
+    //     res.render('./user/loginRegisterPage.ejs', {title: 'Login or Register '})
+    //     :
+    //     res.render('./bookcopy/bookinstance_detail.ejs', { title: 'Copy: '+bookinstance.book.title, bookinstance:  bookinstance, username: req.user.username
+    //   });
+    //   let dueBk = bookinstance.due_back;
+    // })
+
+
+    // }
+    // else {
+    //   // Data from form is valid.
+    //   bookinstance.save(function (err) {
+    //   if (err) { return next(err); }
+    //     // Successful - redirect to new record.
+    //     res.redirect(bookinstance.url);
+    //   });
+    // }
+
+    console.log('bookinstanceController.js exports.bookinstance_detail_post [,,,,,,,(req,res,next)]');
+
+  }
+];
 
 
 

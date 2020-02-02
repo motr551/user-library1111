@@ -33,14 +33,16 @@
     <% }  %>
 
     <!-- Input to select delete -->
-    <hr> 
-    <p><a href='<%= genre.url %>/delete'>
-      Delete genre
-      </a>
-    </p>
-    <p> <a href='<%= genre.url %>/update' >
-      Update Genre </a> 
-    </p>
+    <% if (username == 'admin') { %>
+      <hr> 
+      <p><a href='<%= genre.url %>/delete'>
+        Delete genre
+        </a>
+      </p>
+      <p> <a href='<%= genre.url %>/update' >
+        Update Genre </a> 
+      </p>
+    <% } %>
 
   </div> 
 </body>
